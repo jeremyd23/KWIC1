@@ -1,35 +1,38 @@
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.*;
 
-import static javafx.scene.input.KeyCode.T;
-
+/**
+ * Main program version of KWIC with method calls, all accessing shared data.
+ * Accepts a file with lines of text. Circularly shifts the first word in each line to the end of that line.
+ * Sorts the lines of text in order and then prints to results.txt and the console.
+ */
 public class KWICMain
 {
     private static Scanner input;
     private static ArrayList<LinkedList> textFile = new ArrayList<>();
 
+    /**
+     * Main controller
+     * @param args
+     */
     public static void main(String[] args)
     {
-        boolean done = false;
         Scanner console = new Scanner(System.in);
 
-        //do
-        //{
-            input(console);
-
-            circularShift();
-            //output();
-        //}
-        //while (!done);
-
-    }
-
-    public static void input(Scanner console)
-    {
-        System.out.println("Please enter a file name (poem)");
+        System.out.println("Please enter a file name (poem OR long)");
         String fileName = console.nextLine();
 
+        input(fileName);
+        circularShift();
+        sort();
+        output();
+    }
+
+    private static void input(String fileName)
+    {
         try
         {
             input = new Scanner(new FileInputStream(fileName + ".txt"));
@@ -39,15 +42,13 @@ public class KWICMain
                 String line = input.nextLine();
                 String delims = "[ ]+";
 
-                LinkedList<String> lineWords = new LinkedList(Arrays.asList(line.split(delims)));
+                LinkedList<String> lineWords = new LinkedList(Arrays.asList(line.replace(",", "").split(delims)));
                 textFile.add(lineWords);
             }
-
-
         }
         catch (FileNotFoundException e)
         {
-            e.getMessage();
+            System.out.println("File not found");
         }
         finally
         {
@@ -55,18 +56,18 @@ public class KWICMain
         }
     }
 
-    public static void circularShift()
+    private static void circularShift()
     {
         for(int i = 0; i < textFile.size(); i++)
         {
             String first = (String)textFile.get(i).getFirst();
             textFile.get(i).removeFirst();
             textFile.get(i).add(first);
-
-            System.out.println(textFile.get(i));
         }
-        System.out.println();
+    }
 
+    private static void sort()
+    {
         Collections.sort(textFile, new Comparator<LinkedList>()
         {
             @Override
@@ -74,20 +75,37 @@ public class KWICMain
             {
                 String list1 = first.getFirst().toString().toLowerCase();
                 String list2 = second.getFirst().toString().toLowerCase();
+                if(list1.compareTo(list2) == 0)
+                {
+                    list1 = first.get(1).toString().toLowerCase();
+                    list2 = second.get(1).toString().toLowerCase();
+                }
                 return list1.compareTo(list2);
             }
         });
-
-
-
-        for(int i = 0; i < textFile.size(); i++)
-        {
-            System.out.println(textFile.get(i));
-        }
     }
 
-    public static void output()
+    private static void output()
     {
+        PrintWriter output = null;
+        try
+        {
+            output = new PrintWriter(new FileOutputStream("results.txt"));
 
+            for (LinkedList line : textFile)
+            {
+                output.println(line);
+                System.out.println(line);
+            }
+
+        }
+        catch(FileNotFoundException e)
+        {
+            System.out.println("File name does not exist");
+        }
+        finally
+        {
+           output.close();
+        }
     }
 }
