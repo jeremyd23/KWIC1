@@ -60,7 +60,7 @@ public class KWICMain
     {
         for(int i = 0; i < textFile.size(); i++)
         {
-            String first = (String)textFile.get(i).getFirst();
+            Object first = textFile.get(i).getFirst();
             textFile.get(i).removeFirst();
             textFile.get(i).add(first);
         }
@@ -97,6 +97,7 @@ public class KWICMain
                 output.println(line);
                 System.out.println(line);
             }
+            output.flush();
 
         }
         catch(FileNotFoundException e)
